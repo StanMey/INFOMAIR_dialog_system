@@ -1,0 +1,17 @@
+{
+    "ack": ["okay um", "okay"],
+    "affirm": ["yes right", "right", "correct", "indeed", "yes"],
+    "bye": ["goodbye", "good bye", "bye"],
+    "confirm": ["is it in", "does it serve"],
+    "deny": ["i dont want", "i don't want"],
+    "hello": ["hi", "hello", "good morning"],
+    "inform": ["im looking", "i'm looking", "can you", "north"],
+    "negate": ["no", "uh no"],
+    "null": ["noise", "sil", "unintelligible"],
+    "repeat": ["repeat", "go back", "again"],
+    "reqalts": ["how about", "what about", "is there anything else", "is there", "anything else"],
+    "reqmore": ["more"],
+    "request": ["what is the ", "whats", "can i have", "could i have", "phone number", "address", "type of food", "post code", "price range"],
+    "restart": ["okay start over", "again", "restart", "start over"],
+    "thankyou": ["thank you goodbye", "thank you good bye", "thankyou", "thank you"]
+}
