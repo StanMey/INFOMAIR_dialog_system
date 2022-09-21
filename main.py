@@ -1,45 +1,33 @@
-import sys
+from tkinter import dialog
 import pandas as pd
 
-from intent_classification.baselines import MostOccuringBaselinePredictor, RuleBasedBaselinePredictor
+from dialog_management import DialogManager
 from intent_classification.ml_naive_bayes import NaiveBayesPredictor
 
 # load in the train/test data
 train_path = "./data/training_dialog.pkl"
-test_path = "./data/training_dialog.pkl"
-
 train_df = pd.read_pickle(train_path)
-test_df = pd.read_pickle(test_path)
-
-# build the menu
-choices = {
-    "1": ("max occurances", MostOccuringBaselinePredictor),
-    "2": ("rule-based", RuleBasedBaselinePredictor),
-    "3": ("naive Bayes", NaiveBayesPredictor),
-    "exit": ("exit from system", sys.exit)
-}
 
 
 if __name__ == "__main__":
-    print("Please select a method for the intent classification step:")
-    
-    # display the steps
-    for option, choice in choices.items():
-        print(f"option {option}: {choice[0]}")
-    
-    # wait for answer and handle answer accordingly
-    print("Please select an option:")
-    user_answer = input()
 
-    # select the model
-    model = choices.get(user_answer)[1]()
+    # setup the intent classifier
+    intent_model = NaiveBayesPredictor()
+    intent_model.train(train_df["utterance_content"], train_df["dialog_act"])
 
-    # Train the model
-    model.train(train_df.utterance_content.to_list(), train_df.dialog_act.to_list())
+    # setup the DialogManager
+    user_answer = "hello"
+    dialog_manager = DialogManager("hello", intent_model)
+    dialog_manager.next_state(user_answer)
 
-    # 
-    print("What's on your mind?")
-    while user_answer != "exit":
-        user_answer = input()
-        prediction = model.predict([user_answer])
-        print(f"{prediction}\nInteresting, what else?")
+    # initialize the base case for the loop
+    while dialog_manager.get_current_state != "thankyou" or "bye":
+
+        # let the system make its utterance
+        print(dialog_manager.get_system_utterance())
+
+        # get the user input and make it lowercase
+        user_answer = str(input()).lower()
+        
+        # process the user input and set the next state
+        dialog_manager.next_state(user_answer)
