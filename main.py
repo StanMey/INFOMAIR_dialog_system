@@ -1,4 +1,3 @@
-from tkinter import dialog
 import pandas as pd
 
 from dialog_management import DialogManager
@@ -16,18 +15,17 @@ if __name__ == "__main__":
     intent_model.train(train_df["utterance_content"], train_df["dialog_act"])
 
     # setup the DialogManager
-    user_answer = "hello"
-    dialog_manager = DialogManager("hello", intent_model)
-    dialog_manager.next_state(user_answer)
+    user_answer = None
+    dialog_manager = DialogManager("1_welcome", intent_model)
+    dialog_manager.run_system_response()
 
     # initialize the base case for the loop
-    while dialog_manager.get_current_state != "thankyou" or "bye":
+    while dialog_manager.get_current_state() != "exit":
 
-        # let the system make its utterance
-        print(dialog_manager.get_system_utterance())
+        if dialog_manager.demand_answer:
+            # get the user input and make it lowercase
+            user_answer = str(input()).lower()
 
-        # get the user input and make it lowercase
-        user_answer = str(input()).lower()
-        
         # process the user input and set the next state
         dialog_manager.next_state(user_answer)
+        print(f"state: {dialog_manager.get_current_state()}; user_prefs: {dialog_manager.user_preferences}")
