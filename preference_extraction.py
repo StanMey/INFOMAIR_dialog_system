@@ -2,8 +2,21 @@ import Levenshtein
 import numpy as np
 import re
 
+from typing import List, Union
 
-def find_preference(options, user_utterance, max_levensthein: int = 3):
+
+
+def find_preference(options: List[str], user_utterance: str, max_levensthein: int = 3) -> Union[str, None]:
+    """Finds the preference in a sentence out of a list with options and the levensthein distance.
+
+    Args:
+        options (List[str]): a list of options for which we search in the text.
+        user_utterance (str): The input from the user.
+        max_levensthein (int, optional): the length of the levensthein distance. Defaults to 3.
+
+    Returns:
+        Union[str, None]: returns either the best found match or None
+    """
     smallest_distance = np.inf
     best: str = None
     current = False
