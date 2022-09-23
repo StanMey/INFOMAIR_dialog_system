@@ -26,6 +26,8 @@ dialog_choices = {
 
 @dataclass
 class UserPreference:
+    """A dataclass for holding information about the preferences of the user.
+    """
     area: str = None
     cuisine: str = None
     pricerange: str = None
@@ -77,7 +79,7 @@ class DialogManager:
         return self.state
 
 
-    def next_state(self, user_utterance: str):
+    def next_state(self, user_utterance: str) -> None:
         """This function uses the current state and the input from the user to set the next state.
 
         Args:
@@ -98,7 +100,7 @@ class DialogManager:
             self.state == "1_welcome"
         
         elif dialog_act == "dontcare":
-            # handle dontcare
+            # TODO handle dontcare
             ...
 
 
@@ -193,7 +195,7 @@ class DialogManager:
                     self.run_system_response(5)
                     self.demand_answer = True
 
-        
+
         elif self.state == "6_give_information":
             if dialog_act == "request":
                 # the user wants some information
@@ -235,10 +237,10 @@ class DialogManager:
         return area, cuisine, pricerange
     
     def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str]]) -> None:
-        """_summary_
+        """Updates the preferences of the user based on the preferences found.
 
         Args:
-            preferences (Tuple[Union[None,str], Union[None,str], Union[None,str]]): _description_
+            preferences (Tuple[Union[None,str], Union[None,str], Union[None,str]]): The preferences found during the extraction.
         """
         area, cuisine, pricerange = preferences
         if area:
@@ -263,7 +265,7 @@ class DialogManager:
         self.remaining_restaurants = options
 
     def run_system_response(self, dialog_option: int) -> None:
-        """Selects a sentence based on the input and, whenever needed, constructs the sentences.
+        """Selects a sentence based on the input and, whenever needed, constructs the sentences by filling in the templates.
 
         Args:
             dialog_option (int): The specific dialog to run in the CLI
@@ -271,6 +273,12 @@ class DialogManager:
         dialog_sentence = dialog_choices.get(dialog_option)
 
         if self.chosen_restaurant:
-            dialog_sentence = dialog_sentence.replace("<name>", f"{self.chosen_restaurant.name}").replace("<area>", f"{self.chosen_restaurant.area}").replace("<pricerange>", f"{self.chosen_restaurant.pricerange}")
+            restaurant_info = [
+                ("<name>", self.chosen_restaurant.name), ("<area>", self.chosen_restaurant.area), ("<pricerange>", self.chosen_restaurant.pricerange),
+                ("<address>", self.chosen_restaurant.address), ("<phone>", self.chosen_restaurant.phone), ("<postcode>", self.chosen_restaurant.postcode)]
+
+            # run all the replacements
+            for tag, info in restaurant_info:
+                dialog_sentence = dialog_sentence.replace(tag, info)
 
         print(dialog_sentence)

@@ -15,7 +15,7 @@ def find_preference(options: List[str], user_utterance: str, max_levensthein: in
         max_levensthein (int, optional): the length of the levensthein distance. Defaults to 3.
 
     Returns:
-        Union[str, None]: returns either the best found match or None
+        Union[str, None]: returns either the best found match or None.
     """
     smallest_distance = np.inf
     best: str = None
