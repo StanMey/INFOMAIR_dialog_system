@@ -1,13 +1,21 @@
 import pandas as pd
 
+from pathlib import Path
+
+from dataloaders import load_restaurants
 from dialog_management import DialogManager
 from intent_classification.ml_naive_bayes import NaiveBayesPredictor
 
-# load in the train/test data
-train_path = "./data/training_dialog.pkl"
+
+# load in the training dialog data
+train_path = Path("./data/training_dialog.pkl")
 train_df = pd.read_pickle(train_path)
 
+# load in the restaurant options
+restaurants_path = Path("./data/restaurant_info(1).csv")
+restaurants = load_restaurants(restaurants_path)
 
+# run the main program
 if __name__ == "__main__":
 
     # setup the intent classifier
@@ -16,8 +24,8 @@ if __name__ == "__main__":
 
     # setup the DialogManager
     user_answer = None
-    dialog_manager = DialogManager("1_welcome", intent_model)
-    dialog_manager.run_system_response()
+    dialog_manager = DialogManager("1_welcome", intent_model, restaurants)
+    dialog_manager.run_system_response(1)
 
     # initialize the base case for the loop
     while dialog_manager.get_current_state() != "exit":

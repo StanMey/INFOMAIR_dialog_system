@@ -12,13 +12,13 @@ class Restaurant:
     name: str
     pricerange: str
     area: str
-    food: str
+    cuisine: str
     phone: str
     address: str
     postcode: str
 
     def __repr__(self):
-        return f"(name='{self.name}', pricerange='{self.pricerange}', area='{self.area}', food='{self.food}', phone='{self.phone}', address='{self.address}', postcode='{self.postcode}')"
+        return f"(name='{self.name}', pricerange='{self.pricerange}', area='{self.area}', food='{self.cuisine}', phone='{self.phone}', address='{self.address}', postcode='{self.postcode}')"
 
 
 def load_restaurants(file_path: Path) -> List[Restaurant]:
