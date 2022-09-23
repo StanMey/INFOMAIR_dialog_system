@@ -1,5 +1,6 @@
 import pandas as pd
 
+from decouple import config
 from pathlib import Path
 
 from dataloaders import load_restaurants
@@ -36,4 +37,5 @@ if __name__ == "__main__":
 
         # process the user input and set the next state
         dialog_manager.next_state(user_answer)
-        print(f"state: {dialog_manager.get_current_state()}; user_prefs: {dialog_manager.user_preferences}")
+        if config('debug', cast=bool):
+            print(f"state: {dialog_manager.get_current_state()}; user_prefs: {dialog_manager.user_preferences}")

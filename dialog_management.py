@@ -1,5 +1,6 @@
 import sys
 from dataclasses import dataclass
+from decouple import config
 from typing import List, Tuple, Union
 
 from dataloaders import Restaurant
@@ -8,7 +9,7 @@ from intent_classification.ml_naive_bayes import NaiveBayesPredictor
 
 
 dialog_choices = {
-    1 : "Hello , welcome to the Cambridge restaurant system? You can ask for restaurants by area , price range or food type . How may I help you?",
+    1 : "Hello , welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?",
     2 : "What part of town do you have in mind?",
     3 : "What kind of food would you like?",
     4 : "What do you want more?",
@@ -62,7 +63,7 @@ class DialogManager:
         self.remaining_restaurants = restaurants
         self.chosen_restaurant = None
         # 
-        self.max_levenshtein = 3
+        self.max_levenshtein = config('levenshtein_distance', cast=int)
         self.unique_areas = list(set([rest.area for rest in self.restaurants if rest.area != ""]))
         self.unique_cuisines = list(set([rest.cuisine for rest in self.restaurants if rest.cuisine != ""]))
         self.unique_priceranges = list(set([rest.pricerange for rest in self.restaurants if rest.pricerange != ""]))
