@@ -232,9 +232,9 @@ class DialogManager:
         Returns:
             Tuple[Union[None,str], Union[None,str], Union[None,str]]: The found response of the user for the area, cuisine and pricerange
         """
-        area = find_preference(self.unique_areas, user_utterance, max_levensthein=self.max_levenshtein)
-        cuisine = find_preference(self.unique_cuisines, user_utterance, max_levensthein=self.max_levenshtein)
-        pricerange = find_preference(self.unique_priceranges, user_utterance, max_levensthein=self.max_levenshtein)
+        area = find_preference(self.unique_areas, user_utterance, max_levenshtein=self.max_levenshtein)
+        cuisine = find_preference(self.unique_cuisines, user_utterance, max_levenshtein=self.max_levenshtein)
+        pricerange = find_preference(self.unique_priceranges, user_utterance, max_levenshtein=self.max_levenshtein)
         return area, cuisine, pricerange
     
     def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str]]) -> None:

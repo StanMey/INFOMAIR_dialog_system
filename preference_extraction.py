@@ -6,7 +6,7 @@ from typing import List, Union
 
 
 
-def find_preference(options: List[str], user_utterance: str, max_levensthein: int = 3) -> Union[str, None]:
+def find_preference(options: List[str], user_utterance: str, max_levenshtein: int = 3) -> Union[str, None]:
     """Finds the preference in a sentence out of a list with options and the levensthein distance.
 
     Args:
@@ -34,6 +34,6 @@ def find_preference(options: List[str], user_utterance: str, max_levensthein: in
                     smallest_distance = distance
                     best = option
     if best and not current:
-        if smallest_distance < max_levensthein:
+        if smallest_distance < max_levenshtein:
             pref = best
     return pref
