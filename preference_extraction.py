@@ -7,12 +7,12 @@ from typing import List, Union
 
 
 def find_preference(options: List[str], user_utterance: str, max_levenshtein: int = 3) -> Union[str, None]:
-    """Finds the preference in a sentence out of a list with options and the levensthein distance.
+    """Finds the preference in a sentence out of a list with options and the levenshtein distance.
 
     Args:
         options (List[str]): a list of options for which we search in the text.
         user_utterance (str): The input from the user.
-        max_levensthein (int, optional): the length of the levensthein distance. Defaults to 3.
+        max_levenshtein (int, optional): the length of the levenshtein distance. Defaults to 3.
 
     Returns:
         Union[str, None]: returns either the best found match or None.
@@ -22,7 +22,7 @@ def find_preference(options: List[str], user_utterance: str, max_levenshtein: in
     current = False
     pref = None
     for option in options:
-        if re.search(r"^.*" + re.escape(option) + r".*", user_utterance):
+        if option in user_utterance:
             # an exact match has been found
             pref = option
             current = True
