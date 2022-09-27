@@ -3,7 +3,7 @@ import pandas as pd
 from decouple import config
 from pathlib import Path
 
-from dataloaders import load_restaurants
+from utils import load_restaurants
 from dialog_management import DialogManager
 from intent_classification.ml_naive_bayes import NaiveBayesPredictor
 

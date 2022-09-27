@@ -1,15 +1,14 @@
-import sys
 from dataclasses import dataclass
 from decouple import config
 from typing import List, Tuple, Union
 
-from dataloaders import Restaurant
+from utils import Restaurant
 from preference_extraction import find_preference
 from intent_classification.ml_naive_bayes import NaiveBayesPredictor
 
 
 dialog_choices = {
-    1 : "Hello , welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?",
+    1 : "Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?",
     2 : "What part of town do you have in mind?",
     3 : "What kind of food would you like?",
     4 : "What do you want more?",
@@ -21,7 +20,7 @@ dialog_choices = {
     10: "The postcode of <name> is <postcode>",
     11: "Anything else?",
     12: "Goodbye and have a nice day",
-    13: "Sorry I couldn't understand that"
+    13: "Sorry, I couldn't understand that"
 }
 
 
@@ -58,18 +57,17 @@ class DialogManager:
         self.state = initial_state
         self.intent_model = intent_model
         self.user_preferences = UserPreference()
-        # 
+        self.demand_answer = True
+        # variables regarding the restaurants information
         self.restaurants = restaurants
         self.remaining_restaurants = restaurants
         self.chosen_restaurant = None
-        # 
+        # variables regarding preference searching
         self.max_levenshtein = config('levenshtein_distance', cast=int)
         self.unique_areas = list(set([rest.area for rest in self.restaurants if rest.area != ""]))
         self.unique_cuisines = list(set([rest.cuisine for rest in self.restaurants if rest.cuisine != ""]))
         self.unique_priceranges = list(set([rest.pricerange for rest in self.restaurants if rest.pricerange != ""]))
         self.contact_information = ["phone", "address", "postcode"]
-        # 
-        self.demand_answer = True
     
     def get_current_state(self) -> str:
         """getter function for getting the state.
@@ -107,6 +105,7 @@ class DialogManager:
 
         elif self.state == "1_welcome":
             if dialog_act == "hello":
+                self.state = "1_welcome"
                 self.run_system_response(1)
                 self.demand_answer = True
 
@@ -175,6 +174,10 @@ class DialogManager:
                 self.state = "6_give_information"
                 self.run_system_response(7)
                 self.demand_answer = True
+            
+            elif dialog_act == "request":
+                self.state = "6_give_information"
+                self.demand_answer = False
             
             else:
                 if dialog_act in ("inform", "reqalts"):
