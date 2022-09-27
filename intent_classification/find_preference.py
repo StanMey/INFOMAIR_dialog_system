@@ -18,6 +18,7 @@ test_df = pd.read_pickle(test_path)
 max_levensthein = 4
 
 def find_preference(pref, options):
+    with_levenstein = False
     smallest_distance = np.inf
     best = 0
     current = False
@@ -37,7 +38,8 @@ def find_preference(pref, options):
         if best and not current:
             if smallest_distance < max_levensthein:
                 pref = best
-    return pref
+                with_levenstein = True
+    return pref, with_levenstein
 
 
 
