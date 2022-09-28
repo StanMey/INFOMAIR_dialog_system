@@ -115,17 +115,17 @@ class DialogManager:
         if dialog_act in ("bye", "thankyou"):
             self.state = "exit"
         
-        elif dialog_act == "restart":
+        elif config('allow_restart', cast=bool) and (dialog_act == "restart" or user_utterance in ("restart", "start over")):
             # immediately restart the dialogue from the beginning and erase all gathered information
             self.user_preferences = UserPreference()
             self.chosen_restaurant = None
             self.state == "1_welcome"
+            self.run_system_response(1)
 
 
         elif self.state == "1_welcome":
             if dialog_act == "hello":
                 self.state = "1_welcome"
-                self.run_system_response(1)
                 self.demand_answer = True
 
             if dialog_act == "inform":
