@@ -4,23 +4,40 @@ from typing import List, Tuple, Union
 
 from utils import Restaurant
 from preference_extraction import find_preference
-from intent_classification.ml_naive_bayes import NaiveBayesPredictor
+from intent_classification import IntentClassifier
 
 
 dialog_choices = {
-    1 : "Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?",
-    2 : "What part of town do you have in mind?",
-    3 : "What kind of food would you like?",
-    4 : "What do you want more?",
-    5 : "<name> is a nice place in the <area> of town and the prices are <pricerange>",
-    6 : "I'm sorry but there are no restaurants matching your description, would you like to change something?",
-    7 : "Would you like some additional information about the place?",
-    8 : "<name> is on <address>",
-    9 : "The phone number of <name> is <phone>",
-    10: "The postcode of <name> is <postcode>",
-    11: "Anything else?",
-    12: "Goodbye and have a nice day",
-    13: "Sorry, I couldn't understand that"
+    "formal": {
+        1 : "Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?",
+        2 : "What part of town do you have in mind?",
+        3 : "What type of food do you prefer?",
+        4 : "Do you have any additional preferences?",
+        5 : "<name> is a nice place in the <area> of town and the prices are <pricerange>",
+        6 : "I'm sorry but there are no restaurants matching your description, would you like to change something?",
+        7 : "Would you like some additional information about the place?",
+        8 : "<name> is on <address>",
+        9 : "The phone number of <name> is <phone>",
+        10: "The postcode of <name> is <postcode>",
+        11: "Is there anything else I can help you with?",
+        12: "Goodbye and have a nice day",
+        13: "Sorry, I couldn't understand that"
+    },
+    "informal": {
+        1 : "Hi there, let's choose a restaurant! Where do you want to eat? Area, food type, price range?",
+        2 : "What part of town do you want?",
+        3 : "What kind of food do you fancy?",
+        4 : "Anything else you wanna add?",
+        5 : "Okay, I found a cool place named <name> in the <area> of the town with <pricerange> food.",
+        6 : "Whoops, I found nothing matching your needs. Wanna try something else?",
+        7 : "Y'all need some more information?",
+        8 : "<name> is on <address>",
+        9 : "Phone number: <phone>",
+        10: "The postcode is <postcode>",
+        11: "Anything else?",
+        12: "See you later, alligator and have a good day!",
+        13: "Couldn't understand that, come again?"
+    }
 }
 
 
@@ -53,7 +70,14 @@ class UserPreference:
 class DialogManager:
     """The class for the DialogManager, the brains of the dialogue.
     """
-    def __init__(self, initial_state: str, intent_model: NaiveBayesPredictor, restaurants: List[Restaurant]) -> None:
+    def __init__(self, initial_state: str, intent_model: IntentClassifier, restaurants: List[Restaurant]) -> None:
+        """_summary_
+
+        Args:
+            initial_state (str): The initial state of the dialog.
+            intent_model (IntentClassifier): The intent classifier to use.
+            restaurants (List[Restaurant]): A list of possible restaurants to choose from.
+        """
         self.state = initial_state
         self.intent_model = intent_model
         self.user_preferences = UserPreference()
@@ -85,8 +109,7 @@ class DialogManager:
             user_utterance (str): the input from the user.
         """
         # predict the state based on the user input
-        #TODO fix intent classification
-        dialog_act = self.intent_model.predict([user_utterance])[0]
+        dialog_act = self.intent_model.predict(user_utterance)
         print(f"dialog act: {dialog_act}")
 
         if dialog_act in ("bye", "thankyou"):
@@ -97,10 +120,6 @@ class DialogManager:
             self.user_preferences = UserPreference()
             self.chosen_restaurant = None
             self.state == "1_welcome"
-        
-        elif dialog_act == "dontcare":
-            # TODO handle dontcare
-            ...
 
 
         elif self.state == "1_welcome":
@@ -203,7 +222,7 @@ class DialogManager:
         elif self.state == "6_give_information":
             if dialog_act == "request":
                 # the user wants some information
-                req = find_preference(self.contact_information, user_utterance, max_levensthein=self.max_levenshtein)
+                req = find_preference(self.contact_information, user_utterance, max_levenshtein=self.max_levenshtein)
                 if req == "phone":
                     # the user wants the phone number
                     self.run_system_response(9)
@@ -274,7 +293,10 @@ class DialogManager:
         Args:
             dialog_option (int): The specific dialog to run in the CLI
         """
-        dialog_sentence = dialog_choices.get(dialog_option)
+        if config('formal', cast=bool):
+            dialog_sentence = dialog_choices.get("formal").get(dialog_option)
+        else:
+            dialog_sentence = dialog_choices.get("informal").get(dialog_option)
 
         if self.chosen_restaurant:
             restaurant_info = [
