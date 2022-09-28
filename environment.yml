@@ -9,3 +9,4 @@ dependencies:
   - scikit-learn
   - python-levenshtein
   - python-decouple
+  - spacy

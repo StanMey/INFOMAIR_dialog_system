@@ -5,7 +5,7 @@ from pathlib import Path
 
 from utils import load_restaurants
 from dialog_management import DialogManager
-from intent_classification.ml_naive_bayes import NaiveBayesPredictor
+from intent_classification import NaiveBayesPredictor
 
 
 # load in the training dialog data
@@ -21,14 +21,14 @@ if __name__ == "__main__":
 
     # setup the intent classifier
     intent_model = NaiveBayesPredictor()
-    intent_model.train(train_df["utterance_content"], train_df["dialog_act"])
+    intent_model.train(train_df["utterance_content"].to_list(), train_df["dialog_act"].to_list())
 
     # setup the DialogManager
     user_answer = None
     dialog_manager = DialogManager("1_welcome", intent_model, restaurants)
     dialog_manager.run_system_response(1)
 
-    # initialize the base case for the loop
+    # while the current state is not exit, keep on looping
     while dialog_manager.get_current_state() != "exit":
 
         if dialog_manager.demand_answer:
