@@ -294,8 +294,10 @@ class DialogManager:
             dialog_option (int): The specific dialog to run in the CLI
         """
         if config('formal', cast=bool):
+            # use formal language
             dialog_sentence = dialog_choices.get("formal").get(dialog_option)
         else:
+            # use informal language
             dialog_sentence = dialog_choices.get("informal").get(dialog_option)
 
         if self.chosen_restaurant:
@@ -307,4 +309,7 @@ class DialogManager:
             for tag, info in restaurant_info:
                 dialog_sentence = dialog_sentence.replace(tag, info)
 
-        print(dialog_sentence)
+        if config('use_caps', cast=bool):
+            print(dialog_sentence.upper())
+        else:
+            print(dialog_sentence)
