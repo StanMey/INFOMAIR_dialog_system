@@ -293,12 +293,14 @@ class DialogManager:
         Args:
             dialog_option (int): The specific dialog to run in the CLI
         """
+        dialog_sentence = "System: "
+
         if config('formal', cast=bool):
             # use formal language
-            dialog_sentence = dialog_choices.get("formal").get(dialog_option)
+            dialog_sentence += dialog_choices.get("formal").get(dialog_option)
         else:
             # use informal language
-            dialog_sentence = dialog_choices.get("informal").get(dialog_option)
+            dialog_sentence += dialog_choices.get("informal").get(dialog_option)
 
         if self.chosen_restaurant:
             restaurant_info = [
