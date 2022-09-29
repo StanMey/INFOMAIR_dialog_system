@@ -13,7 +13,7 @@ train_path = Path("./data/training_dialog.pkl")
 train_df = pd.read_pickle(train_path)
 
 # load in the restaurant options
-restaurants_path = Path("./data/restaurant_info(1).csv")
+restaurants_path = Path("./data/restaurant_info.csv")
 restaurants = load_restaurants(restaurants_path)
 
 # run the main program

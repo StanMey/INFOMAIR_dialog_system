@@ -40,7 +40,6 @@ dialog_choices = {
     }
 }
 
-
 @dataclass
 class UserPreference:
     """A dataclass for holding information about the preferences of the user.
@@ -48,6 +47,7 @@ class UserPreference:
     area: str = None
     cuisine: str = None
     pricerange: str = None
+    additional_requirements: str = None
 
     def has_unfilled_preferences(self) -> bool:
         """Check whether there are still unfilled preferences left.
@@ -64,7 +64,7 @@ class UserPreference:
             self.pricerange = "any"
 
     def __str__(self) -> str:
-        return f"(area: {self.area}; cuisine: {self.cuisine}; pricerange: {self.pricerange})"
+        return f"(area: {self.area}; cuisine: {self.cuisine}; pricerange: {self.pricerange}; additional_reqs: {self.additional_requirements})"
 
 
 class DialogManager:
@@ -92,6 +92,7 @@ class DialogManager:
         self.unique_cuisines = list(set([rest.cuisine for rest in self.restaurants if rest.cuisine != ""]))
         self.unique_priceranges = list(set([rest.pricerange for rest in self.restaurants if rest.pricerange != ""]))
         self.contact_information = ["phone", "address", "postcode"]
+        self.additional_requirements = ["romantic", "touristic", "children", "assigned seats"]
     
     def get_current_state(self) -> str:
         """getter function for getting the state.
@@ -160,7 +161,7 @@ class DialogManager:
                 # extract and update the preferences of the user
                 preferences = self.extract_preferences(user_utterance)
                 self.update_user_preferences(preferences)
-            
+
             self.state = "1_welcome"
             self.demand_answer = False
 
@@ -245,33 +246,37 @@ class DialogManager:
                 self.state = "exit"
 
 
-    def extract_preferences(self, user_utterance: str) -> Tuple[Union[None,str], Union[None,str], Union[None,str]]:
+    def extract_preferences(self, user_utterance: str) -> Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]:
         """Extract the preferences of the user from their response.
 
         Args:
             user_utterance (str): The response of the user.
 
         Returns:
-            Tuple[Union[None,str], Union[None,str], Union[None,str]]: The found response of the user for the area, cuisine and pricerange
+            Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]: The found response of the user for the area, cuisine, pricerange and additional requirements.
         """
         area = find_preference(self.unique_areas, user_utterance, max_levenshtein=self.max_levenshtein)
         cuisine = find_preference(self.unique_cuisines, user_utterance, max_levenshtein=self.max_levenshtein)
         pricerange = find_preference(self.unique_priceranges, user_utterance, max_levenshtein=self.max_levenshtein)
-        return area, cuisine, pricerange
+        additional = find_preference(self.additional_requirements, user_utterance, max_levenshtein=self.max_levenshtein)
+        return area, cuisine, pricerange, additional
     
-    def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str]]) -> None:
+    def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]) -> None:
         """Updates the preferences of the user based on the preferences found.
 
         Args:
-            preferences (Tuple[Union[None,str], Union[None,str], Union[None,str]]): The preferences found during the extraction.
+            preferences (Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]): The preferences found during the extraction.
         """
-        area, cuisine, pricerange = preferences
+        area, cuisine, pricerange, additional_requirement = preferences
         if area:
             self.user_preferences.area = area
         if cuisine:
             self.user_preferences.cuisine = cuisine
         if pricerange:
             self.user_preferences.pricerange = pricerange
+        if additional_requirement:
+            # check if the additional requirement is already added for the user
+            self.user_preferences.additional_requirements = additional_requirement
 
     def filter_restaurants(self) -> None:
         """Filters the restaurants based on the preference of the user.
@@ -284,8 +289,27 @@ class DialogManager:
                 # this restaurant is acceptable
                 options.append(r)
 
+        if self.user_preferences.additional_requirements:
+            req_options = []
+
+            for r in options:
+                if self.user_preferences.additional_requirements == "touristic":
+                    if r.is_touristic():
+                        req_options.append(r)
+                if self.user_preferences.additional_requirements == "assigned seats":
+                    if r.has_assigned_seats():
+                        req_options.append(r)
+                if self.user_preferences.additional_requirements == "children":
+                    if r.has_assigned_seats():
+                        req_options.append(r)
+                if self.user_preferences.additional_requirements == "romantic":
+                    if r.is_romantic:
+                        req_options.append(r)
+            options = req_options
+        
         # update the restaurants the user can choose from
         self.remaining_restaurants = options
+
 
     def run_system_response(self, dialog_option: int) -> None:
         """Selects a sentence based on the input and, whenever needed, constructs the sentences by filling in the templates.
@@ -310,6 +334,9 @@ class DialogManager:
             # run all the replacements
             for tag, info in restaurant_info:
                 dialog_sentence = dialog_sentence.replace(tag, info)
+            
+            if self.user_preferences.additional_requirements:
+                dialog_sentence += f"\nThe restaurant is {self.user_preferences.additional_requirements} because ..."
 
         if config('use_caps', cast=bool):
             print(dialog_sentence.upper())

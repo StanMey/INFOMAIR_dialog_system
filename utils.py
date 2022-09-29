@@ -16,6 +16,21 @@ class Restaurant:
     phone: str
     address: str
     postcode: str
+    quality: str
+    crowdedness: str
+    length_of_stay: str
+
+    def is_touristic(self):
+        return self.pricerange == "cheap" and self.quality == "good food"
+    
+    def has_assigned_seats(self):
+        return self.crowdedness == "busy"
+    
+    def children(self):
+        return self.length_of_stay == "short stay"
+    
+    def is_romantic(self):
+        return self.crowdedness == "quiet" and self.length_of_stay == "long stay"
 
     def __repr__(self):
         return f"(name='{self.name}', pricerange='{self.pricerange}', area='{self.area}', food='{self.cuisine}', phone='{self.phone}', address='{self.address}', postcode='{self.postcode}')"

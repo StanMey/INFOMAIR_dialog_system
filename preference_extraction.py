@@ -4,7 +4,6 @@ import numpy as np
 from typing import List, Union
 
 
-
 def find_preference(options: List[str], user_utterance: str, max_levenshtein: int = 0) -> Union[str, None]:
     """Finds the preference in a sentence out of a list with options and the levenshtein distance.
 
@@ -40,3 +39,4 @@ def find_preference(options: List[str], user_utterance: str, max_levenshtein: in
         if smallest_distance < max_levenshtein:
             pref = best
     return pref
+    
