@@ -93,6 +93,10 @@ class DialogManager:
         self.unique_priceranges = list(set([rest.pricerange for rest in self.restaurants if rest.pricerange != ""]))
         self.contact_information = ["phone", "address", "postcode"]
         self.additional_requirements = ["romantic", "touristic", "children", "assigned seats"]
+        # patterns
+        self.area_patterns = ["part", "side", "area"]
+        self.cuisine_patterns = ["restaurant", "cuisine", "food", "type"]
+        self.pricerange_patterns = ["pricerange", "price", "priced", "restaurant"] + self.unique_cuisines
     
     def get_current_state(self) -> str:
         """getter function for getting the state.
@@ -255,10 +259,10 @@ class DialogManager:
         Returns:
             Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]: The found response of the user for the area, cuisine, pricerange and additional requirements.
         """
-        area = find_preference(self.unique_areas, user_utterance, max_levenshtein=self.max_levenshtein)
-        cuisine = find_preference(self.unique_cuisines, user_utterance, max_levenshtein=self.max_levenshtein)
-        pricerange = find_preference(self.unique_priceranges, user_utterance, max_levenshtein=self.max_levenshtein)
-        additional = find_preference(self.additional_requirements, user_utterance, max_levenshtein=self.max_levenshtein)
+        area = find_preference(self.unique_areas, user_utterance, self.area_patterns, max_levenshtein=self.max_levenshtein)
+        cuisine = find_preference(self.unique_cuisines, user_utterance, self.cuisine_patterns, max_levenshtein=self.max_levenshtein)
+        pricerange = find_preference(self.unique_priceranges, user_utterance, self.pricerange_patterns, max_levenshtein=self.max_levenshtein)
+        additional = find_preference(self.additional_requirements, user_utterance, [], max_levenshtein=self.max_levenshtein)
         return area, cuisine, pricerange, additional
     
     def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]) -> None:
