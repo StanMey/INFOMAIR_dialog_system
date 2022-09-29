@@ -1,8 +1,10 @@
 import pandas as pd
+import time
 
 from decouple import config
 from pathlib import Path
 
+from random import randrange
 from utils import load_restaurants
 from dialog_management import DialogManager
 from intent_classification import NaiveBayesPredictor
@@ -30,7 +32,8 @@ if __name__ == "__main__":
 
     # while the current state is not exit, keep on looping
     while dialog_manager.get_current_state() != "exit":
-
+        # Indroduce random system delay between 0 to 2 seconds.
+        time.sleep(randrange(10))
         if dialog_manager.demand_answer:
             # get the user input and make it lowercase
             user_answer = str(input()).lower()
