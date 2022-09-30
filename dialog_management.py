@@ -40,6 +40,7 @@ dialog_choices = {
     }
 }
 
+
 @dataclass
 class UserPreference:
     """A dataclass for holding information about the preferences of the user.
@@ -47,7 +48,7 @@ class UserPreference:
     area: str = None
     cuisine: str = None
     pricerange: str = None
-    additional_requirements: str = None
+    additional_requirement: str = None
 
     def has_unfilled_preferences(self) -> bool:
         """Check whether there are still unfilled preferences left.
@@ -64,7 +65,7 @@ class UserPreference:
             self.pricerange = "any"
 
     def __str__(self) -> str:
-        return f"(area: {self.area}; cuisine: {self.cuisine}; pricerange: {self.pricerange}; additional_reqs: {self.additional_requirements})"
+        return f"(area: {self.area}; cuisine: {self.cuisine}; pricerange: {self.pricerange}; additional_reqs: {self.additional_requirement})"
 
 
 class DialogManager:
@@ -92,11 +93,21 @@ class DialogManager:
         self.unique_cuisines = list(set([rest.cuisine for rest in self.restaurants if rest.cuisine != ""]))
         self.unique_priceranges = list(set([rest.pricerange for rest in self.restaurants if rest.pricerange != ""]))
         self.contact_information = ["phone", "address", "postcode"]
-        self.additional_requirements = ["romantic", "touristic", "children", "assigned seats"]
         # patterns
         self.area_patterns = ["part", "side", "area"]
         self.cuisine_patterns = ["restaurant", "cuisine", "food", "type"]
         self.pricerange_patterns = ["pricerange", "price", "priced", "restaurant"] + self.unique_cuisines
+        # implication rules
+        self.implication_rules = {
+            "touristic": ["cheap", "good food"],
+            "untouristic": ["romanian"],
+            "assigned seats": ["busy"],
+            "children": ["short stay"],
+            "no children": ["long stay"],
+            "romantic": ["not busy"],
+            "unromantic": ["busy", "short stay"]
+        }
+        self.unique_additional_requirements = list(set(self.implication_rules.keys()))
     
     def get_current_state(self) -> str:
         """getter function for getting the state.
@@ -262,7 +273,7 @@ class DialogManager:
         area = find_preference(self.unique_areas, user_utterance, self.area_patterns, max_levenshtein=self.max_levenshtein)
         cuisine = find_preference(self.unique_cuisines, user_utterance, self.cuisine_patterns, max_levenshtein=self.max_levenshtein)
         pricerange = find_preference(self.unique_priceranges, user_utterance, self.pricerange_patterns, max_levenshtein=self.max_levenshtein)
-        additional = find_preference(self.additional_requirements, user_utterance, [], max_levenshtein=self.max_levenshtein)
+        additional = find_preference(self.unique_additional_requirements, user_utterance, [], max_levenshtein=self.max_levenshtein)
         return area, cuisine, pricerange, additional
     
     def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]) -> None:
@@ -279,8 +290,7 @@ class DialogManager:
         if pricerange:
             self.user_preferences.pricerange = pricerange
         if additional_requirement:
-            # check if the additional requirement is already added for the user
-            self.user_preferences.additional_requirements = additional_requirement
+            self.user_preferences.additional_requirement = additional_requirement
 
     def filter_restaurants(self) -> None:
         """Filters the restaurants based on the preference of the user.
@@ -293,22 +303,27 @@ class DialogManager:
                 # this restaurant is acceptable
                 options.append(r)
 
-        if self.user_preferences.additional_requirements:
+        if self.user_preferences.additional_requirement:
+            # the user has an additional requirement, so we have to do some implication work
             req_options = []
+            antecedents = self.implication_rules.get(self.user_preferences.additional_requirement)
 
-            for r in options:
-                if self.user_preferences.additional_requirements == "touristic":
-                    if r.is_touristic():
-                        req_options.append(r)
-                if self.user_preferences.additional_requirements == "assigned seats":
-                    if r.has_assigned_seats():
-                        req_options.append(r)
-                if self.user_preferences.additional_requirements == "children":
-                    if r.has_assigned_seats():
-                        req_options.append(r)
-                if self.user_preferences.additional_requirements == "romantic":
-                    if r.is_romantic:
-                        req_options.append(r)
+            # loop over all remaining restaurants
+            for res in options:
+                # get all the important properties of the restaurant
+                props = res.get_restaurant_properties()
+                contains_all_antecedents = True
+
+                # check if the antecedents hold for the properties of the current restaurant
+                for antecedent in antecedents:
+                    if antecedent not in props:
+                        # an antecedent is missing so this restaurant is not suitable
+                        contains_all_antecedents = False
+                        break
+                
+                if contains_all_antecedents:
+                    req_options.append(res)
+
             options = req_options
         
         # update the restaurants the user can choose from
@@ -339,8 +354,21 @@ class DialogManager:
             for tag, info in restaurant_info:
                 dialog_sentence = dialog_sentence.replace(tag, info)
             
-            if self.user_preferences.additional_requirements:
-                dialog_sentence += f"\nThe restaurant is {self.user_preferences.additional_requirements} because ..."
+            if self.user_preferences.additional_requirement and self.state == "5_make_suggestion":
+                user_req = self.user_preferences.additional_requirement
+                antecedents = self.implication_rules.get(self.user_preferences.additional_requirement)
+
+                # build a suitable reasoning text for every user requirement
+                if user_req in ("touristic", "untouristic"):
+                    dialog_sentence += f"\nThe restaurant is {user_req} because the food is {antecedents[0]}"
+                elif user_req in ("children", "no children"):
+                    dialog_sentence += f"\nIt is advisable to take {user_req} to this restaurant because the restaurant is catered to {antecedents[0]}"
+                elif user_req == "assigned seats":
+                    dialog_sentence += f"\nThe restaurant is {antecedents[0]} and therefore has {user_req}"
+                elif user_req == "romantic":
+                    dialog_sentence += f"\nThe restaurant is {user_req} because it is {antecedents[0]}"
+                elif user_req == "unromantic":
+                    dialog_sentence += f"\nThe restaurant is not {user_req} because it is {antecedents[0]} and only allows for {antecedents[1]}"
 
         if config('use_caps', cast=bool):
             print(dialog_sentence.upper())

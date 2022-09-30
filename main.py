@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # while the current state is not exit, keep on looping
     while dialog_manager.get_current_state() != "exit":
         # Indroduce random system delay between 0 to 3 seconds.
-        time.sleep(randrange(3))
+        # time.sleep(randrange(3))
         if dialog_manager.demand_answer:
             # get the user input and make it lowercase
             user_answer = str(input()).lower()

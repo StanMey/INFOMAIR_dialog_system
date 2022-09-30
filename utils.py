@@ -2,7 +2,7 @@ import csv
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 
 @dataclass
@@ -20,17 +20,8 @@ class Restaurant:
     crowdedness: str
     length_of_stay: str
 
-    def is_touristic(self):
-        return self.pricerange == "cheap" and self.quality == "good food"
-    
-    def has_assigned_seats(self):
-        return self.crowdedness == "busy"
-    
-    def children(self):
-        return self.length_of_stay == "short stay"
-    
-    def is_romantic(self):
-        return self.crowdedness == "quiet" and self.length_of_stay == "long stay"
+    def get_restaurant_properties(self) -> Tuple[str, str, str, str, str]:
+        return self.pricerange, self.cuisine, self.quality, self.crowdedness, self.length_of_stay
 
     def __repr__(self):
         return f"(name='{self.name}', pricerange='{self.pricerange}', area='{self.area}', food='{self.cuisine}', phone='{self.phone}', address='{self.address}', postcode='{self.postcode}')"
