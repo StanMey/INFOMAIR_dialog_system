@@ -26,14 +26,12 @@ def find_preference(options: List[str], user_utterance: str, patterns: List[str]
         if option in user_utterance and option != "any":
             # an exact match has been found
             pref = option
-            # current = True
-            # return option
             return pref
     # pattern matching
     for word in user_utterance.split():
         if word in patterns:
             if prev_word == "any":
-                return "dontcare"
+                return "any"
             break
         prev_word = word
     # levenshtein distance below maximum
