@@ -104,6 +104,7 @@ class DialogManager:
         self.area_patterns = ["part", "side", "area"]
         self.cuisine_patterns = ["restaurant", "cuisine", "food", "type"]
         self.pricerange_patterns = ["pricerange", "price", "priced", "restaurant"] + self.unique_cuisines
+        self.implication_patterns = ["vibe"]
         # implication rules
         self.implication_rules = {
             "touristic": ["cheap", "good food"],
@@ -176,6 +177,8 @@ class DialogManager:
             else:
                 # got all information, now make a suggestion
                 self.state = "5_make_suggestion"
+                # filter on the restaurants
+                self.filter_restaurants()
 
 
         elif self.state == "2_ask_area":
@@ -227,8 +230,8 @@ class DialogManager:
                     preferences = self.extract_preferences(user_utterance)
                     self.update_user_preferences(preferences)
 
-                # filter on the restaurants
-                self.filter_restaurants()
+                    # filter on the restaurants
+                    self.filter_restaurants()
 
                 if not self.remaining_restaurants:
                     # no restaurants found
@@ -246,11 +249,8 @@ class DialogManager:
                     self.old_restaurant = self.chosen_restaurant
                     self.chosen_restaurant = self.remaining_restaurants.pop()
 
-                    if self.chosen_restaurant == self.old_restaurant:
-                        # there is no alternative restaurant
-                        self.run_system_response(5)
-                    else:
-                        self.run_system_response(6)
+                    # ask the user for their response
+                    self.run_system_response(5)
                     self.demand_answer = True
 
 
@@ -299,7 +299,7 @@ class DialogManager:
         area = find_preference(self.unique_areas, user_utterance, self.area_patterns, max_levenshtein=self.max_levenshtein)
         cuisine = find_preference(self.unique_cuisines, user_utterance, self.cuisine_patterns, max_levenshtein=self.max_levenshtein)
         pricerange = find_preference(self.unique_priceranges, user_utterance, self.pricerange_patterns, max_levenshtein=self.max_levenshtein)
-        additional = find_preference(self.unique_additional_requirements, user_utterance, [], max_levenshtein=self.max_levenshtein)
+        additional = find_preference(self.unique_additional_requirements, user_utterance, self.implication_patterns, max_levenshtein=self.max_levenshtein)
         return area, cuisine, pricerange, additional
     
     def update_user_preferences(self, preferences: Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]) -> None:
@@ -390,7 +390,7 @@ class DialogManager:
                 if user_req in ("touristic", "untouristic"):
                     dialog_sentence += f"\nThe restaurant is {user_req} because the food is {antecedents[0]}"
                 elif user_req in ("children", "no children"):
-                    dialog_sentence += f"\nIt is advisable to take {user_req} to this restaurant because the restaurant is catered to {antecedents[0]}"
+                    dialog_sentence += f"\nIt is advisable to take {user_req} to this restaurant since the restaurant is catered to {antecedents[0]}"
                 elif user_req == "assigned seats":
                     dialog_sentence += f"\nThe restaurant is {antecedents[0]} and therefore has {user_req}"
                 elif user_req == "romantic":
