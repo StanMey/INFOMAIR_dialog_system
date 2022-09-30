@@ -1,4 +1,5 @@
 import time
+import pyttsx3
 
 from dataclasses import dataclass
 from tkinter import dialog
@@ -358,8 +359,10 @@ class DialogManager:
         Args:
             dialog_option (int): The specific dialog to run in the CLI
         """
-        dialog_sentence = "System: "
-
+        if not config('use_tts', cast=bool):
+            dialog_sentence = "System: "
+        else: 
+            dialog_sentence = ""
         if config('formal', cast=bool):
             # use formal language
             dialog_sentence += dialog_choices.get("formal").get(dialog_option)
@@ -398,6 +401,16 @@ class DialogManager:
 
         if config('use_caps', cast=bool):
             dialog_sentence = dialog_sentence.upper()
+
+        print(dialog_sentence)
+        # use text-to-speech 
+        if config('use_tts', cast=bool):
+            engine = pyttsx3.init()
+            engine.setProperty('rate', config('tts_rate', cast=int))
+            engine.setProperty('voice', engine.getProperty('voices')[config('tts_voice', cast=int)].id)
+            engine.setProperty('volume', config('tts_volume', cast=float))
+            engine.say(dialog_sentence)
+            engine.runAndWait()
         
         # return the dialog to the user
-        print(dialog_sentence)
+    
