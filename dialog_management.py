@@ -92,6 +92,7 @@ class DialogManager:
         self.restaurants = restaurants
         self.remaining_restaurants = restaurants
         self.chosen_restaurant = None
+        self.old_restaurant = None
         # variables regarding preference searching
         self.max_levenshtein = config('levenshtein_distance', cast=int)
         self.unique_areas = list(set([rest.area for rest in self.restaurants if rest.area != ""]))
@@ -229,24 +230,26 @@ class DialogManager:
                 self.filter_restaurants()
 
                 if not self.remaining_restaurants:
-                    # if restaurant but no alternative
-                    if old_restaurant:
-                        self.chosen_restaurant = old_restaurant
+                    # no restaurants found
+                    if self.old_restaurant:
+                        # during the previous round we already had a restaurant
+                        self.chosen_restaurant = self.old_restaurant
                         self.run_system_response(5)
-                    # no restaurants to choose from
                     else:
+                        # no restaurants to choose from
                         self.run_system_response(6)
                         self.demand_answer = True
 
                 else:
                     # there are one/some restaurants available
-                    old_restaurant = self.chosen_restaurant
+                    self.old_restaurant = self.chosen_restaurant
                     self.chosen_restaurant = self.remaining_restaurants.pop()
-                    # if not alternative
-                    if self.chosen_restaurant == old_restaurant:
-                        self.run_system_response(6)
-                    else:
+
+                    if self.chosen_restaurant == self.old_restaurant:
+                        # there is no alternative restaurant
                         self.run_system_response(5)
+                    else:
+                        self.run_system_response(6)
                     self.demand_answer = True
 
 
