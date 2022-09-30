@@ -104,7 +104,7 @@ class DialogManager:
         self.area_patterns = ["part", "side", "area"]
         self.cuisine_patterns = ["restaurant", "cuisine", "food", "type"]
         self.pricerange_patterns = ["pricerange", "price", "priced", "restaurant"] + self.unique_cuisines
-        self.implication_patterns = ["vibe"]
+        self.implication_patterns = ["vibe", "ambiance", "atmosphere"]
         # implication rules
         self.implication_rules = {
             "touristic": ["cheap", "good food"],
