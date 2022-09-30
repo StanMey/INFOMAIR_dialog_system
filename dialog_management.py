@@ -397,6 +397,7 @@ class DialogManager:
             time.sleep(0.5)
 
         if config('use_caps', cast=bool):
-            print(dialog_sentence.upper())
-        else:
-            print(dialog_sentence)
+            dialog_sentence = dialog_sentence.upper()
+        
+        # return the dialog to the user
+        print(dialog_sentence)
