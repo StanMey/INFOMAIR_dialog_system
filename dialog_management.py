@@ -224,14 +224,24 @@ class DialogManager:
                 self.filter_restaurants()
 
                 if not self.remaining_restaurants:
+                    # if restaurant but no alternative
+                    if old_restaurant:
+                        self.chosen_restaurant = old_restaurant
+                        self.run_system_response(5)
                     # no restaurants to choose from
-                    self.run_system_response(6)
-                    self.demand_answer = True
+                    else:
+                        self.run_system_response(6)
+                        self.demand_answer = True
 
                 else:
                     # there are one/some restaurants available
+                    old_restaurant = self.chosen_restaurant
                     self.chosen_restaurant = self.remaining_restaurants.pop()
-                    self.run_system_response(5)
+                    # if not alternative
+                    if self.chosen_restaurant == old_restaurant:
+                        self.run_system_response(6)
+                    else:
+                        self.run_system_response(5)
                     self.demand_answer = True
 
 
