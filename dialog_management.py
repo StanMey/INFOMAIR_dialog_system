@@ -1,3 +1,5 @@
+import time
+
 from dataclasses import dataclass
 from tkinter import dialog
 from decouple import config
@@ -389,6 +391,10 @@ class DialogManager:
                     dialog_sentence += f"\nThe restaurant is {user_req} because it is {antecedents[0]}"
                 elif user_req == "unromantic":
                     dialog_sentence += f"\nThe restaurant is not {user_req} because it is {antecedents[0]} and only allows for {antecedents[1]}"
+
+        # introduce a random system delay of 0.5 seconds
+        if config('use_delay', cast=bool):
+            time.sleep(0.5)
 
         if config('use_caps', cast=bool):
             print(dialog_sentence.upper())
