@@ -10,3 +10,6 @@ dependencies:
   - python-levenshtein
   - python-decouple
   - spacy
+  - pip
+  - pip:
+    - pyttsx3
