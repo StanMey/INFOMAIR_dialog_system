@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from tkinter import dialog
 from decouple import config
 from typing import List, Tuple, Union
 
@@ -21,7 +22,8 @@ dialog_choices = {
         10: "The postcode of <name> is <postcode>",
         11: "Is there anything else I can help you with?",
         12: "Goodbye and have a nice day",
-        13: "Sorry, I couldn't understand that"
+        13: "Sorry, I couldn't understand that",
+        14: "Excuse me, did you mean <preference>?"
     },
     "informal": {
         1 : "Hi there, let's choose a restaurant! Where do you want to eat? Area, food type, price range?",
@@ -36,7 +38,8 @@ dialog_choices = {
         10: "The postcode is <postcode>",
         11: "Anything else?",
         12: "See you later, alligator and have a good day!",
-        13: "Couldn't understand that, come again?"
+        13: "Couldn't understand that, come again?",
+        14: "Do you mean <preference>?"
     }
 }
 
@@ -264,11 +267,18 @@ class DialogManager:
                 
                 self.run_system_response(11)
                 self.demand_answer = True
-
+                
             else:
                 # the user is satisfied and we can say goodbye
                 self.run_system_response(12)
                 self.state = "exit"
+
+
+        elif self.state == "7_check_preference":
+            if dialog_act == "inform":
+                ...
+
+
 
 
     def extract_preferences(self, user_utterance: str) -> Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]:
