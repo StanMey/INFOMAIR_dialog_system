@@ -2,7 +2,6 @@ import time
 import pyttsx3
 
 from dataclasses import dataclass
-from tkinter import dialog
 from decouple import config
 from typing import List, Tuple, Union
 
@@ -62,13 +61,15 @@ class UserPreference:
         Returns:
             bool: whether the user has unfilled preferences.
         """
-        return not (self.area and self.cuisine and self.pricerange)
+        return not (self.area and self.cuisine and self.pricerange and self.additional_requirement)
     
     def fill_preferences(self) -> None:
         """Fills the remaining preferences so we can give a recommendation.
         """
         if not self.pricerange:
             self.pricerange = "any"
+        if not self.additional_requirement:
+            self.additional_requirement = "any"
 
     def __str__(self) -> str:
         return f"(area: {self.area}; cuisine: {self.cuisine}; pricerange: {self.pricerange}; additional_reqs: {self.additional_requirement})"
@@ -329,7 +330,7 @@ class DialogManager:
                 # this restaurant is acceptable
                 options.append(r)
 
-        if self.user_preferences.additional_requirement:
+        if self.user_preferences.additional_requirement and self.user_preferences.additional_requirement != "any":
             # the user has an additional requirement, so we have to do some implication work
             req_options = []
             antecedents = self.implication_rules.get(self.user_preferences.additional_requirement)
