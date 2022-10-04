@@ -249,10 +249,13 @@ class DialogManager:
                     # there are one/some restaurants available
                     self.old_restaurant = self.chosen_restaurant
                     self.chosen_restaurant = self.remaining_restaurants.pop()
+                    if self.old_restaurant == self.chosen_restaurant:
+                        self.run_system_response(6)
 
-                    # ask the user for their response
-                    self.run_system_response(5)
-                    self.demand_answer = True
+                    else:
+                        # ask the user for their response
+                        self.run_system_response(5)
+                        self.demand_answer = True
 
 
         elif self.state == "6_give_information":
