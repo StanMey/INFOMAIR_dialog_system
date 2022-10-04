@@ -135,7 +135,7 @@ class DialogManager:
         """
         # predict the state based on the user input
         dialog_act = self.intent_model.predict(user_utterance)
-        print(f"dialog act: {dialog_act}")
+        # print(f"dialog act: {dialog_act}")
 
         if dialog_act in ("bye", "thankyou"):
             self.state = "exit"
