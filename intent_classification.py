@@ -189,7 +189,6 @@ if __name__ == "__main__":
 
     # analyse all the models above
     models = [MostOccuringBaselinePredictor(), RuleBasedBaselinePredictor(), NaiveBayesPredictor(), KNNPredictor()]
-    models = [KNNPredictor()]
     results = []
     for model in models:
         # train the model
