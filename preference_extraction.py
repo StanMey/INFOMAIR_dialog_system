@@ -19,7 +19,6 @@ def find_preference(options: List[str], user_utterance: str, patterns: List[str]
     """
     smallest_distance = np.inf
     best: str = None
-    # current = False
     pref = None
     prev_word = ""
     for option in options:
