@@ -108,14 +108,28 @@ class DialogManager:
         self.implication_patterns = ["vibe", "ambiance", "atmosphere"]
         # implication rules
         self.implication_rules = {
-            "touristic": ["cheap", "good food"],
-            "untouristic": ["romanian"],
-            "assigned seats": ["busy"],
-            "children": ["short stay"],
-            "no children": ["long stay"],
-            "romantic": ["not busy"],
-            "unromantic": ["busy", "short stay"]
-        }
+            "touristic": {
+                "antecedents": ["cheap", "good food"],
+                "texts": ["touristic", "is cheap", "has good food"]},
+            "untouristic": {
+                "antecedents": ["romanian"],
+                "texts": ["is not touristic"]},
+            "assigned seats": {
+                "antecedents": ["busy"],
+                "texts": ["reservation only", "is busy"]},
+            "children": {
+                "antecedents": ["short stay"],
+                "texts": ["child-friendly", "is catered to short-stay"]},
+            "no children": {
+                "antecedents": ["long stay"],
+                "texts": ["not child-friendly", "is catered to long-stay"]},
+            "romantic": {
+                "antecedents": ["not busy"],
+                "texts": ["romantic", "is not busy"]},
+            "unromantic": {
+                "antecedents": ["busy", "short stay"],
+                "texts": ["not romantic", "is busy", "is catered to short-stay"]}
+            }
         self.unique_additional_requirements = list(set(self.implication_rules.keys()))
     
     def get_current_state(self) -> str:
@@ -180,6 +194,7 @@ class DialogManager:
                 self.state = "5_make_suggestion"
                 # filter on the restaurants
                 self.filter_restaurants()
+                self.demand_answer = False
 
 
         elif self.state == "2_ask_area":
@@ -284,13 +299,6 @@ class DialogManager:
                 self.state = "exit"
 
 
-        elif self.state == "7_check_preference":
-            if dialog_act == "inform":
-                ...
-
-
-
-
     def extract_preferences(self, user_utterance: str) -> Tuple[Union[None,str], Union[None,str], Union[None,str], Union[None,str]]:
         """Extract the preferences of the user from their response.
 
@@ -336,7 +344,7 @@ class DialogManager:
         if self.user_preferences.additional_requirement and self.user_preferences.additional_requirement != "any":
             # the user has an additional requirement, so we have to do some implication work
             req_options = []
-            antecedents = self.implication_rules.get(self.user_preferences.additional_requirement)
+            antecedents = self.implication_rules.get(self.user_preferences.additional_requirement).get("antecedents")
 
             # loop over all remaining restaurants
             for res in options:
@@ -350,7 +358,7 @@ class DialogManager:
                         # an antecedent is missing so this restaurant is not suitable
                         contains_all_antecedents = False
                         break
-                
+
                 if contains_all_antecedents:
                     req_options.append(res)
 
@@ -386,21 +394,26 @@ class DialogManager:
             for tag, info in restaurant_info:
                 dialog_sentence = dialog_sentence.replace(tag, info)
             
-            if self.user_preferences.additional_requirement and self.state == "5_make_suggestion":
+            if self.user_preferences.additional_requirement and self.state == "5_make_suggestion" and self.user_preferences.additional_requirement != "any":
+                # check whether we have a valid input as the additional requirement and we're in the state where we can make suggestions
                 user_req = self.user_preferences.additional_requirement
-                antecedents = self.implication_rules.get(self.user_preferences.additional_requirement)
+                # get the corresponding antecedents and texts
+                antecedents = self.implication_rules.get(user_req).get("antecedents")
+                texts = self.implication_rules.get(user_req).get("texts")
 
-                # build a suitable reasoning text for every user requirement
-                if user_req in ("touristic", "untouristic"):
-                    dialog_sentence += f"\nThe restaurant is {user_req} because the food is {antecedents[0]}"
-                elif user_req in ("children", "no children"):
-                    dialog_sentence += f"\nIt is advisable to take {user_req} to this restaurant since the restaurant is catered to {antecedents[0]}"
-                elif user_req == "assigned seats":
-                    dialog_sentence += f"\nThe restaurant is {antecedents[0]} and therefore has {user_req}"
-                elif user_req == "romantic":
-                    dialog_sentence += f"\nThe restaurant is {user_req} because it is {antecedents[0]}"
-                elif user_req == "unromantic":
-                    dialog_sentence += f"\nThe restaurant is not {user_req} because it is {antecedents[0]} and only allows for {antecedents[1]}"
+                # setup the reasoning text for explaining the choice (reason0 is reserved for the consequence)
+                if len(antecedents) == 1:
+                    dialog_sentence += f"\nThe restaurant is <reason0> because it <reason1>."
+                elif len(antecedents) == 2:
+                    dialog_sentence += f"\nThe restaurant is <reason0> because it <reason1> and <reason2>."
+                elif len(antecedents) == 3:
+                    dialog_sentence += f"\nThe restaurant is <reason0> because it <reason1>, <reason2> and <reason3>."
+                else:
+                    raise NotImplementedError("A maximum of three antecendents can be used for the reasoning component.")
+
+                # fill in the templates using the texts
+                for i, text in enumerate(texts):
+                    dialog_sentence = dialog_sentence.replace(f"<reason{i}>", text)
 
         # introduce a random system delay of 0.5 seconds
         if config('use_delay', cast=bool):
@@ -409,7 +422,9 @@ class DialogManager:
         if config('use_caps', cast=bool):
             dialog_sentence = dialog_sentence.upper()
 
+        # return the dialog to the user
         print(dialog_sentence)
+
         # use text-to-speech 
         if config('use_tts', cast=bool):
             engine = pyttsx3.init()
@@ -418,6 +433,4 @@ class DialogManager:
             engine.setProperty('volume', config('tts_volume', cast=float))
             engine.say(dialog_sentence)
             engine.runAndWait()
-        
-        # return the dialog to the user
     
