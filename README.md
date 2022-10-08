@@ -11,7 +11,7 @@ Teammembers:
 A `[env.yml]` file has been added to this repository in order to easily run the system.
 
 ### Install locally (using anaconda)
-1. `conda env create -f env.yml`
+1. `conda env create -f environment.yml`
 2. `conda activate infomair_env`
 3. `python -m spacy download en_core_web_sm`
 
