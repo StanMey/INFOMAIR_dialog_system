@@ -1,16 +1,14 @@
-import pandas as pd
-
 from decouple import config
 from pathlib import Path
 
-from utils import load_restaurants
+from utils import load_restaurants, load_restaurant_train_test_split
 from dialog_management import DialogManager
 from intent_classification import NaiveBayesPredictor
 
 
 # load in the training dialog data
-train_path = Path("./data/training_dialog.pkl")
-train_df = pd.read_pickle(train_path)
+data_path = Path("./data/dialog_acts.dat")
+train_df, _ = load_restaurant_train_test_split(data_path)
 
 # load in the restaurant options
 restaurants_path = Path("./data/restaurant_info.csv")

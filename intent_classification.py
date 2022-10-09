@@ -198,7 +198,7 @@ if __name__ == "__main__":
         # compute the accuracy
         accuracy = accuracy_score(y_test, y_pred)
         # compute the prf scores
-        precision, recall, fscore, _ = precision_recall_fscore_support(y_test, y_pred, average="micro")
+        precision, recall, fscore, _ = precision_recall_fscore_support(y_test, y_pred, average="weighted")
         results.append((model.name, accuracy, precision, recall, fscore))
     
     headers = ["Method", "accuracy", "precision", "recall", "fscore"]
