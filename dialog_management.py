@@ -1,5 +1,6 @@
 import time
 import pyttsx3
+import random
 
 from dataclasses import dataclass
 from decouple import config
@@ -12,36 +13,65 @@ from intent_classification import IntentClassifier
 
 dialog_choices = {
     "formal": {
-        1 : "Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?",
-        2 : "What part of town do you have in mind?",
-        3 : "What type of food do you prefer?",
-        4 : "Do you have any additional preferences?",
-        5 : "<name> is a nice place in the <area> of town and the prices are <pricerange>",
-        6 : "I'm sorry but there are no restaurants matching your description, would you like to change something?",
-        7 : "Would you like some additional information about the place?",
-        8 : "<name> is on <address>",
-        9 : "The phone number of <name> is <phone>",
-        10: "The postcode of <name> is <postcode>",
-        11: "Is there anything else I can help you with?",
-        12: "Goodbye and have a nice day",
-        13: "Sorry, I couldn't understand that",
-        14: "Excuse me, did you mean <preference>?"
+        1 : ["Hello, welcome to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I help you?",
+            "Good day, greetings to the Cambridge restaurant system. You can ask for restaurants by area, price range or food type. How may I assist you?"],
+        2 : ["What part of town would you prefer?",
+            "What area of the city would you prefer?"],
+        3 : ["What type of food would you prefer?",
+            "What food type would you prefer?"],
+        4 : ["Do you have any additional preferences?",
+            "Would you like to request additional preferences?"],
+        5 : ["<name> is a nice place in the <area> of town and the prices are <pricerange>.",
+            "<name> is a nice restaurant in the <area> part of the city and it handles <pricerange> prices."],
+        6 : ["I'm sorry but there are no restaurants matching your description, would you like to change something?",
+            "There seem to be no restaurants matching your description, is there something to be changed about your preferences?"],
+        7 : ["Would you like some additional information about the place?",
+            "Would you like some specific information about the restaurant?"],
+        8 : ["<name> is on <address>.",
+            "The restaurant is located on <address>."],
+        9 : ["The phone number of <name> is <phone>.",
+            "The phone number of the restaurant is <phone>."],
+        10: ["The postcode of <name> is <postcode>",
+            "The postcode is <postcode>"],
+        11: ["Is there anything else I can help you with?",
+            "Would you like to know something else?"],
+        12: ["Goodbye and have a nice day.",
+            "Goodbye, I hope I have been of assistance to you."],
+        13: ["Sorry, I couldn't understand that.",
+            "I'm sorry, I was not able to interpret that."],
+        14: ["Excuse me, did you mean <preference>?"
+            "Sorry, did you mean <preference>?"],
     },
     "informal": {
-        1 : "Hi there, let's choose a restaurant! Where do you want to eat? Area, food type, price range?",
-        2 : "What part of town do you want?",
-        3 : "What kind of food do you fancy?",
-        4 : "Anything else you wanna add?",
-        5 : "Okay, I found a cool place named <name> in the <area> of the town with <pricerange> food.",
-        6 : "Whoops, I found nothing matching your needs. Wanna try something else?",
-        7 : "Y'all need some more information?",
-        8 : "<name> is on <address>",
-        9 : "Phone number: <phone>",
-        10: "The postcode is <postcode>",
-        11: "Anything else?",
-        12: "See you later, alligator and have a good day!",
-        13: "Couldn't understand that, come again?",
-        14: "Do you mean <preference>?"
+        1 : ["Howdy, let's choose a restaurant! Where do you want to eat? Area, food type, price range?",
+            "Hi there, you hungry? What do you fancy today? area, food type, price range, you tell me?"],
+        2 : ["What part of town do you want?",
+            "What part of the city do you like?"],
+        3 : ["What kind of food do you fancy?",
+            "What kind of food do you crave?"],
+        4 : ["Anything else you wanna add?",
+            "Anything else?"],
+        5 : ["Okay, I found a cool place named <name> in the <area> of the town with <pricerange> food.",
+            "Woohoo, I found a great place called <name> in the <area> of the city with a <pricerange> price",
+            "Awesome!, <name> is a great restaurant in the <area> with some <pricerange> food"],
+        6 : ["Whoops, I found nothing matching your needs. Wanna try something else?",
+            "Awww, I did not find any restaurants, how about changing some preference?"],
+        7 : ["Y'all need some more information?",
+            "Something else?"],
+        8 : ["<name> is on <address>",
+            "<address>"],
+        9 : ["Phone number: <phone>",
+            "<phone>"],
+        10: ["postcode: <postcode>",
+            "<postcode>"],
+        11: ["Anything else?",
+            "Do you want anything else?"],
+        12: ["See you later, alligator!",
+            "BYE, THANKS!!"],
+        13: ["Couldn't understand that, come again?",
+            "No clue, come again?"],
+        14: ["Do you mean <preference>?"
+            "Wait, do you mean <preference>?"],
     }
 }
 
@@ -380,10 +410,10 @@ class DialogManager:
             dialog_sentence = ""
         if config('formal', cast=bool):
             # use formal language
-            dialog_sentence += dialog_choices.get("formal").get(dialog_option)
+            dialog_sentence += random.choice(dialog_choices.get("formal").get(dialog_option))
         else:
             # use informal language
-            dialog_sentence += dialog_choices.get("informal").get(dialog_option)
+            dialog_sentence += random.choice(dialog_choices.get("informal").get(dialog_option))
 
         if self.chosen_restaurant:
             restaurant_info = [
