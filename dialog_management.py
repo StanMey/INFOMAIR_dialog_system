@@ -56,7 +56,7 @@ dialog_choices = {
             "Awesome!, <name> is a great restaurant in the <area> with some <pricerange> food"],
         6 : ["Whoops, I found nothing matching your needs. Wanna try something else?",
             "Awww, I did not find any restaurants, how about changing some preference?"],
-        7 : ["Y'all need some more information?",
+        7 : ["You need something more?",
             "Something else?"],
         8 : ["<name> is on <address>",
             "<address>"],
